@@ -1,6 +1,11 @@
 import { Progress } from "@/components/progress";
+import { User } from "@/types/types";
 
-export default function StatsPanel({ user }) {
+interface StatsPanelProps {
+  user: User;
+}
+
+export default function StatsPanel({ user }: StatsPanelProps) {
   const level = Math.floor(user.totalScore / 500) + 1;
   const xp = user.totalScore % 500;
 

@@ -1,7 +1,14 @@
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
+import { Topic } from "@/types/types";
 
-export default function TopicCard3D({ topic, completed, onClick }) {
+interface TopicCard3DProps {
+  topic: Topic;
+  completed: boolean;
+  onClick: () => void;
+}
+
+export default function TopicCard3D({ topic, completed, onClick }: TopicCard3DProps) {
   return (
     <motion.div
       whileHover={{
