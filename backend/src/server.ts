@@ -11,72 +11,117 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
-app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "http://172.30.11.43:5173",
-    "https://spacey-science.vercel.app"
-  ],
-  credentials: true
-}));
+/* ========================
+   CORS CONFIG
+======================== */
+
+app.use(
+  cors({
+    origin: [
+      'http://localhost:5173',
+      'http://172.30.11.43:5173',
+      'https://spacey-science.vercel.app'
+    ],
+    credentials: true
+  })
+);
+
+/* ========================
+   MIDDLEWARE
+======================== */
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Request logging middleware
-app.use((req, res, next) => {
+// Logging
+app.use((req, _res, next) => {
   console.log(`${req.method} ${req.path}`);
   next();
 });
 
-// MongoDB Connection
-const connectDB = async () => {
-  try {
-    await mongoose.connect(process.env.MONGODB_URI!);
-    console.log('✅ MongoDB Connected Successfully');
-  } catch (error) {
-    console.error('❌ MongoDB Connection Error:', error);
-    process.exit(1);
-  }
-};
+/* ========================
+   ROOT HEALTH CHECK (IMPORTANT FOR RENDER)
+======================== */
 
-connectDB();
+app.get('/', (_req, res) => {
+  res.status(200).send('🚀 Spacey Science API Running');
+});
 
-// Routes
-app.use('/api/users', userRoutes);
-app.use('/api/quiz', quizRoutes);
-app.use('/api/progress', progressRoutes);
+/* ========================
+   API HEALTH CHECK
+======================== */
 
-// Health check
-app.get('/api/health', (req, res) => {
-  res.json({ 
+app.get('/api/health', (_req, res) => {
+  res.json({
     success: true,
     message: 'Spacey Science API is running! 🚀',
     timestamp: new Date().toISOString()
   });
 });
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({ 
+/* ========================
+   ROUTES
+======================== */
+
+app.use('/api/users', userRoutes);
+app.use('/api/quiz', quizRoutes);
+app.use('/api/progress', progressRoutes);
+
+/* ========================
+   404 HANDLER
+======================== */
+
+app.use((_req, res) => {
+  res.status(404).json({
     success: false,
-    error: 'Route not found' 
+    error: 'Route not found'
   });
 });
 
-// Error handler
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error('Server Error:', err);
-  res.status(500).json({ 
-    success: false,
-    error: err.message || 'Internal server error' 
-  });
-});
+/* ========================
+   ERROR HANDLER
+======================== */
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
-});
+app.use(
+  (
+    err: any,
+    _req: express.Request,
+    res: express.Response,
+    _next: express.NextFunction
+  ) => {
+    console.error('Server Error:', err);
+    res.status(500).json({
+      success: false,
+      error: err.message || 'Internal server error'
+    });
+  }
+);
+
+/* ========================
+   DATABASE + SERVER START
+======================== */
+
+const startServer = async () => {
+  try {
+    if (!process.env.MONGODB_URI) {
+      throw new Error('MONGODB_URI is not defined');
+    }
+
+    await mongoose.connect(process.env.MONGODB_URI);
+    console.log('✅ MongoDB Connected Successfully');
+
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+      console.log(
+        `📍 Environment: ${process.env.NODE_ENV || 'development'}`
+      );
+    });
+  } catch (error) {
+    console.error('❌ Failed to start server:', error);
+    // ❗ DO NOT process.exit(1) on Render
+  }
+};
+
+startServer();
 
 export default app;
