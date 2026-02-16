@@ -24,7 +24,7 @@ function CameraDrift() {
 /* ---------------- SUN ---------------- */
 
 function Sun() {
-  const texture = useTexture("/textures/sun.jpg");
+  const texture = useTexture("/textures/sun.jpg") as THREE.Texture;
 
   return (
     <>
@@ -57,8 +57,15 @@ function Sun() {
 
 /* ---------------- GENERIC PLANET ---------------- */
 
-function Planet({ texturePath, size, distance, speed }) {
-  const texture = useTexture(texturePath);
+interface PlanetProps {
+  texturePath: string;
+  size: number;
+  distance: number;
+  speed: number;
+}
+
+function Planet({ texturePath, size, distance, speed }: PlanetProps) {
+  const texture = useTexture(texturePath) as THREE.Texture;
   const ref = useRef<THREE.Mesh>(null!);
 
   useFrame(({ clock }) => {
@@ -79,8 +86,8 @@ function Planet({ texturePath, size, distance, speed }) {
 /* ---------------- EARTH SYSTEM ---------------- */
 
 function EarthSystem() {
-  const earthMap = useTexture("/textures/earth_day.jpg");
-  const moonMap = useTexture("/textures/moon.jpg");
+  const earthMap = useTexture("/textures/earth_day.jpg") as THREE.Texture;
+  const moonMap = useTexture("/textures/moon.jpg") as THREE.Texture;
 
   const earthRef = useRef<THREE.Mesh>(null!);
   const moonRef = useRef<THREE.Mesh>(null!);
@@ -156,7 +163,6 @@ export default function SpaceScene() {
     <div className="fixed inset-0 -z-10">
       <Canvas
         camera={{ position: [0, 10, 40], fov: 60 }}
-        gl={{ physicallyCorrectLights: true }}
       >
         {/* Deep Space Fog */}
         <fog attach="fog" args={["#050510", 60, 220]} />

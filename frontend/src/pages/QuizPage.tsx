@@ -5,10 +5,9 @@ import { ArrowLeft, Sparkles, Trophy, CheckCircle2, XCircle } from 'lucide-react
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/progress';
-import { Badge } from '@/components/badge';
 import { getTopic } from '@/lib/topics';
 import { generateQuiz, saveProgress } from '@/lib/api';
-import { User, Quiz, QuizQuestion } from '@/types/types';
+import { User, Quiz } from '@/types/types';
 
 interface QuizPageProps {
   user: User;
