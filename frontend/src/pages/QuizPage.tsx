@@ -237,7 +237,6 @@ export default function QuizPage({ user }: QuizPageProps) {
 
   const question = quiz.questions[currentQuestion];
   const progress = ((currentQuestion + 1) / quiz.questions.length) * 100;
-  const currentAnswer = answers[currentQuestion];
 
   return (
     <div className="space-bg min-h-screen">

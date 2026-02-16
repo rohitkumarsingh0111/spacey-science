@@ -54,7 +54,7 @@ function App() {
         />
         <Route 
           path="/lesson/:topicId" 
-          element={user ? <LessonPage user={user} /> : <Navigate to="/" />} 
+          element={user ? <LessonPage /> : <Navigate to="/" />} 
         />
         <Route 
           path="/quiz/:topicId" 

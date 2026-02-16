@@ -5,8 +5,14 @@ import HeroSection from "@/components/topics/HeroSection";
 import TopicCard3D from "@/components/topics/TopicCard3D";
 import StatsPanel from "@/components/topics/StatsPanel";
 import { TOPICS } from "@/lib/topics";
+import { User } from "@/types/types";
 
-export default function TopicsPage({ user, onLogout }) {
+interface TopicsPageProps {
+  user: User;
+  onLogout: () => void;
+}
+
+export default function TopicsPage({ user, onLogout }: TopicsPageProps) {
   const navigate = useNavigate();
 
   return (

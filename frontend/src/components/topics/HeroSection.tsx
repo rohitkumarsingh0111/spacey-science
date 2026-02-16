@@ -1,7 +1,12 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import { User } from "@/types/types";
 
-export default function HeroSection({ user }) {
+interface HeroSectionProps {
+  user: User;
+}
+
+export default function HeroSection({ user }: HeroSectionProps) {
   const [typedText, setTypedText] = useState("");
   const fullText = "Preparing next cosmic mission...";
 
@@ -44,7 +49,7 @@ export default function HeroSection({ user }) {
 
         {/* Astronaut Greeting */}
         <p className="mt-6 text-xl text-gray-300">
-          Welcome back, <span className="text-indigo-400 font-semibold">{user.name}</span> 👨‍🚀
+          Welcome back, <span className="text-indigo-400 font-semibold">{user.name}</span> 
         </p>
 
         {/* Typewriter subtitle */}

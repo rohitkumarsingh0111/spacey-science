@@ -17,11 +17,17 @@ import { Progress } from "@/components/progress";
 
 import { getUserProgress, getProgressStats } from "@/lib/api";
 import SpaceBackground from "@/components/background/SpaceBackground";
+import { Progress as ProgressItem, ProgressStats, User } from "@/types/types";
 
-export default function DashboardPage({ user, onLogout }) {
+interface DashboardPageProps {
+  user: User;
+  onLogout: () => void;
+}
+
+export default function DashboardPage({ user, onLogout }: DashboardPageProps) {
   const navigate = useNavigate();
-  const [progress, setProgress] = useState([]);
-  const [stats, setStats] = useState(null);
+  const [progress, setProgress] = useState<ProgressItem[]>([]);
+  const [stats, setStats] = useState<ProgressStats | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -190,9 +196,9 @@ export default function DashboardPage({ user, onLogout }) {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {stats?.allBadges?.length ? (
+              {stats && stats.allBadges.length ? (
                 <div className="grid grid-cols-2 gap-4">
-                  {stats.allBadges.map((badge, index) => {
+                  {stats.allBadges.map((badge) => {
                     const earned = stats.badges.includes(badge.name);
                     return (
                       <motion.div

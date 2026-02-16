@@ -5,11 +5,6 @@ import { ArrowLeft, ArrowRight, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { getTopic } from '@/lib/topics';
-import { User } from '@/types/types';
-
-interface LessonPageProps {
-  user: User;
-}
 
 const LESSON_CONTENT: Record<string, { title: string; sections: { heading: string; content: string; emoji: string }[] }> = {
   'solar-system': {
@@ -55,7 +50,7 @@ const LESSON_CONTENT: Record<string, { title: string; sections: { heading: strin
   // Add more topics as needed
 }
 
-export default function LessonPage({ user }: LessonPageProps) {
+export default function LessonPage() {
   const { topicId } = useParams();
   const navigate = useNavigate();
   const [currentSection, setCurrentSection] = useState(0);
