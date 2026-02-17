@@ -15,7 +15,11 @@ export default function StatsPanel({ user }: StatsPanelProps) {
         🚀 Level {level} Explorer
       </h2>
 
-      <Progress value={(xp / 500) * 100} />
+     <Progress
+  value={(xp / 500) * 100}
+  className="h-4 bg-white/25 [&>div]:bg-blue-400"
+/>
+
 
       <p className="text-gray-400 mt-2">
         {500 - xp} XP to next level

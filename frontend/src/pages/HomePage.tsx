@@ -104,14 +104,15 @@ export default function HomePage({ onLogin }: HomePageProps) {
             }}
             className="text-9xl mb-6 inline-block"
           >
-            🚀
+            ✈️
+
           </motion.div>
 
           <motion.h1
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
-            className="text-6xl md:text-8xl font-bold mb-4 gradient-text-space"
+            className="text-6xl md:text-8xl font-semibold mb-4 tracking-tight text-white"
           >
             Spacey Science
           </motion.h1>

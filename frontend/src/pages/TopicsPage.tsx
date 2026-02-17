@@ -16,30 +16,50 @@ export default function TopicsPage({ user, onLogout }: TopicsPageProps) {
   const navigate = useNavigate();
 
   return (
-    <div className="relative min-h-screen text-white overflow-hidden">
-      <SpaceScene />
+   <div className="space-bg min-h-screen text-white relative overflow-hidden">
 
-      <header className="relative z-10 backdrop-blur-xl bg-white/5 border-b border-white/10">
-        <div className="container mx-auto px-6 py-5 flex justify-between">
-          <h1 className="text-2xl font-bold text-indigo-400">
-            Spacey Science 🚀
+
+      {/* Subtle Space Background */}
+      <div className="absolute inset-0 -z-10">
+        <SpaceScene /> 
+      </div>
+
+      {/* Header */}
+      <header className="relative z-10 border-b border-white/10 bg-[#0F172A]/80 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
+
+          <h1 className="text-xl font-semibold tracking-tight">
+            Spacey Science
           </h1>
 
           <div className="flex gap-4">
-            <Button onClick={() => navigate("/dashboard")}>
+            <Button
+              variant="outline"
+              onClick={() => navigate("/dashboard")}
+              className="border-white/10 bg-white/5 hover:bg-white/10"
+            >
               Dashboard
             </Button>
-            <Button variant="ghost" onClick={onLogout}>
+
+            <Button
+              variant="ghost"
+              onClick={onLogout}
+              className="text-gray-400 hover:text-white"
+            >
               Logout
             </Button>
           </div>
         </div>
       </header>
 
-      <div className="relative z-10 container mx-auto px-6 py-16">
+      {/* Main Content */}
+      <div className="relative z-10 max-w-7xl mx-auto px-6 py-16">
+
+        {/* HERO SECTION (Cleaner Version) */}
         <HeroSection user={user} />
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        {/* Topics Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mt-16 mb-24">
           {TOPICS.map((topic) => (
             <TopicCard3D
               key={topic.id}
@@ -50,7 +70,9 @@ export default function TopicsPage({ user, onLogout }: TopicsPageProps) {
           ))}
         </div>
 
+        {/* Stats */}
         <StatsPanel user={user} />
+
       </div>
     </div>
   );
