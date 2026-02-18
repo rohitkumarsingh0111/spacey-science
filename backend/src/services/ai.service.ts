@@ -1,8 +1,13 @@
-import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import dotenv from "dotenv";
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+dotenv.config();
+
+if (!process.env.GEMINI_API_KEY) {
+  throw new Error("GEMINI_API_KEY is missing in .env");
+}
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 export interface QuizQuestion {
   question: string;
@@ -12,139 +17,168 @@ export interface QuizQuestion {
 }
 
 const TOPICS_INFO: Record<string, string> = {
-  'solar-system': 'planets, moons, asteroids, and the structure of our solar system',
-  'stars': 'star formation, life cycles, types of stars, constellations',
-  'black-holes': 'black holes, event horizons, gravitational pull, space-time',
-  'galaxies': 'types of galaxies, Milky Way, galaxy formation and structure',
-  'moon': 'Earth\'s moon, phases, lunar surface, moon landing',
-  'mars': 'Mars planet, rovers, Martian atmosphere and geology',
-  'space-exploration': 'spacecraft, astronauts, missions, ISS',
-  'astronomy-basics': 'telescopes, observing space, basic astronomy concepts'
+  "solar-system": "planets, moons, asteroids, and solar system structure",
+  "stars": "star formation, life cycles, constellations",
+  "black-holes": "event horizons, gravity, space-time distortion",
+  "galaxies": "Milky Way, galaxy types, structure",
+  "moon": "phases, lunar surface, moon landing",
+  "mars": "Mars geology, rovers, atmosphere",
+  "space-exploration": "astronauts, spacecraft, ISS",
+  "astronomy-basics": "telescopes and basic space observation"
 };
 
-export async function generateQuiz(
-  topic: string, 
-  difficulty: 'easy' | 'medium' | 'hard' = 'medium'
-): Promise<QuizQuestion[]> {
-  const topicContext = TOPICS_INFO[topic] || topic;
-  
-  const difficultyGuide = {
-    easy: 'simple facts and basic concepts, suitable for ages 6-8',
-    medium: 'interesting facts with some reasoning, suitable for ages 9-11',
-    hard: 'complex concepts and critical thinking, suitable for ages 12+'
-  };
+function extractJSON(text: string) {
+  const cleaned = text
+    .replace(/```json/gi, "")
+    .replace(/```/g, "")
+    .trim();
 
-  const prompt = `You are an expert space educator creating a fun quiz for children. 
+  const match = cleaned.match(/\{[\s\S]*\}/);
+  if (!match) throw new Error("No JSON found in Gemini response");
 
-Topic: ${topicContext}
-Difficulty: ${difficulty} (${difficultyGuide[difficulty]})
-
-Create exactly 5 multiple-choice questions. Make them:
-- Fun and engaging for kids
-- Educational but not boring
-- Age-appropriate
-- Fact-based (no made-up information)
-
-CRITICAL: Return ONLY valid JSON with no markdown formatting, no code blocks, no explanation.
-
-Use this EXACT format:
-{
-  "questions": [
-    {
-      "question": "What is the largest planet in our solar system?",
-      "options": ["Mars", "Jupiter", "Saturn", "Neptune"],
-      "correctAnswer": "Jupiter",
-      "explanation": "Jupiter is the largest planet and could fit over 1,300 Earths inside it!"
-    }
-  ]
+  return JSON.parse(match[0]);
 }
 
-Make explanations fun and memorable for kids!`;
-
+function validateQuestion(q: any): QuizQuestion | null {
   try {
-    const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 2500,
-      temperature: 0.7,
-      messages: [{ role: 'user', content: prompt }],
-    });
-
-    const content = message.content[0];
-    if (content.type !== 'text') {
-      throw new Error('Unexpected response type from AI');
+    if (
+      typeof q.question === "string" &&
+      Array.isArray(q.options) &&
+      q.options.length === 4 &&
+      typeof q.correctAnswer === "string" &&
+      typeof q.explanation === "string" &&
+      q.options.includes(q.correctAnswer)
+    ) {
+      return {
+        question: q.question.trim(),
+        options: q.options.map((o: string) => o.trim()),
+        correctAnswer: q.correctAnswer.trim(),
+        explanation: q.explanation.trim()
+      };
     }
-
-    // Extract JSON from response (handle potential markdown)
-    let jsonText = content.text.trim();
-    
-    // Remove markdown code blocks if present
-    jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '');
-    
-    // Find JSON object
-    const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      console.error('AI Response:', content.text);
-      throw new Error('No valid JSON found in AI response');
-    }
-
-    const parsed = JSON.parse(jsonMatch[0]);
-    
-    if (!parsed.questions || !Array.isArray(parsed.questions) || parsed.questions.length === 0) {
-      throw new Error('Invalid quiz structure in AI response');
-    }
-
-    // Validate each question
-    parsed.questions.forEach((q: any, index: number) => {
-      if (!q.question || !q.options || !Array.isArray(q.options) || 
-          q.options.length !== 4 || !q.correctAnswer || !q.explanation) {
-        throw new Error(`Invalid question structure at index ${index}`);
-      }
-    });
-
-    return parsed.questions;
-  } catch (error: any) {
-    console.error('AI Generation Error:', error);
-    
-    // Fallback quiz if AI fails
-    return getFallbackQuiz(topic);
+    return null;
+  } catch {
+    return null;
   }
 }
 
-function getFallbackQuiz(topic: string): QuizQuestion[] {
-  const fallbacks: Record<string, QuizQuestion[]> = {
-    'solar-system': [
-      {
-        question: "How many planets are in our solar system?",
-        options: ["7", "8", "9", "10"],
-        correctAnswer: "8",
-        explanation: "There are 8 planets: Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, and Neptune!"
-      },
-      {
-        question: "Which planet is known as the Red Planet?",
-        options: ["Venus", "Mars", "Jupiter", "Saturn"],
-        correctAnswer: "Mars",
-        explanation: "Mars looks red because of rusty iron in its soil!"
-      },
-      {
-        question: "Which planet is closest to the Sun?",
-        options: ["Venus", "Earth", "Mercury", "Mars"],
-        correctAnswer: "Mercury",
-        explanation: "Mercury is the closest planet to the Sun and also the smallest planet!"
-      },
-      {
-        question: "What is the largest planet in our solar system?",
-        options: ["Saturn", "Neptune", "Jupiter", "Uranus"],
-        correctAnswer: "Jupiter",
-        explanation: "Jupiter is so big that over 1,300 Earths could fit inside it!"
-      },
-      {
-        question: "Which planet has beautiful rings around it?",
-        options: ["Mars", "Jupiter", "Saturn", "Neptune"],
-        correctAnswer: "Saturn",
-        explanation: "Saturn has the most spectacular rings made of ice and rock!"
-      }
-    ]
-  };
+export async function generateQuiz(
+  topic: string,
+  difficulty: "easy" | "medium" | "hard" = "medium"
+): Promise<QuizQuestion[]> {
+  try {
+    console.log("Generating quiz with Gemini...");
 
-  return fallbacks[topic] || fallbacks['solar-system'];
+    const topicContext = TOPICS_INFO[topic] || topic;
+
+    const model = genAI.getGenerativeModel({
+      model: "gemini-3-flash-preview",
+      generationConfig: {
+        responseMimeType: "application/json",
+        temperature: 0.7
+      }
+    });
+
+    const prompt = `
+You are an expert space educator.
+
+STRICTLY generate quiz questions ONLY about this topic:
+
+"${topicContext}"
+
+Do NOT generate generic solar system questions.
+Do NOT repeat common space trivia.
+Every question must be clearly related to "${topicContext}".
+
+Difficulty level: ${difficulty}
+
+Requirements:
+- Exactly 5 multiple-choice questions
+- 4 options per question
+- correctAnswer must EXACTLY match one option
+- Fun and child-friendly explanation
+- Scientifically accurate
+- No markdown formatting
+
+Return ONLY valid JSON:
+
+{
+  "questions": [
+    {
+      "question": "string",
+      "options": ["A","B","C","D"],
+      "correctAnswer": "exact option text",
+      "explanation": "short explanation"
+    }
+  ]
+}
+`;
+
+
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
+
+    console.log("Gemini Raw Response:", text);
+
+    const parsed = extractJSON(text);
+
+    let validQuestions: QuizQuestion[] = [];
+
+    if (Array.isArray(parsed.questions)) {
+      parsed.questions.forEach((q: any) => {
+        const validated = validateQuestion(q);
+        if (validated) validQuestions.push(validated);
+      });
+    }
+
+    // Fill missing questions with fallback
+    if (validQuestions.length < 5) {
+      console.warn("Gemini returned incomplete quiz. Filling with fallback.");
+      const fallback = fallbackQuiz();
+      const needed = 5 - validQuestions.length;
+      validQuestions = [...validQuestions, ...fallback.slice(0, needed)];
+    }
+
+    return validQuestions;
+
+  } catch (error: any) {
+    console.error("Gemini Quiz Generation Error:", error.message);
+    console.warn("Using full fallback quiz.");
+    return fallbackQuiz();
+  }
+}
+
+function fallbackQuiz(): QuizQuestion[] {
+  return [
+    {
+      question: "How many planets are in our solar system?",
+      options: ["7", "8", "9", "10"],
+      correctAnswer: "8",
+      explanation: "There are 8 planets orbiting our Sun!"
+    },
+    {
+      question: "Which planet is known as the Red Planet?",
+      options: ["Venus", "Mars", "Jupiter", "Saturn"],
+      correctAnswer: "Mars",
+      explanation: "Mars appears red because of iron oxide (rust) in its soil."
+    },
+    {
+      question: "Which planet is the largest?",
+      options: ["Earth", "Saturn", "Jupiter", "Neptune"],
+      correctAnswer: "Jupiter",
+      explanation: "Jupiter is so large that over 1,300 Earths could fit inside it!"
+    },
+    {
+      question: "What galaxy do we live in?",
+      options: ["Andromeda", "Milky Way", "Whirlpool", "Sombrero"],
+      correctAnswer: "Milky Way",
+      explanation: "Our solar system is part of the Milky Way galaxy."
+    },
+    {
+      question: "What powers the Sun?",
+      options: ["Burning gas", "Electricity", "Nuclear fusion", "Lava"],
+      correctAnswer: "Nuclear fusion",
+      explanation: "The Sun shines because nuclear fusion happens in its core."
+    }
+  ];
 }

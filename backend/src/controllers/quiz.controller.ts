@@ -15,11 +15,11 @@ export const createQuiz = async (req: Request, res: Response) => {
 
     console.log(`Generating quiz for user ${userId}, topic: ${topic}, difficulty: ${difficulty || 'medium'}`);
 
-    // Check if recent quiz exists (within last 24 hours)
+    // Check if recent quiz exists (within 1 min)
     const recentQuiz = await Quiz.findOne({ 
       userId, 
       topic,
-      generatedAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) }
+      generatedAt: { $gte: new Date(Date.now() - 60 * 1000) }
     }).sort({ generatedAt: -1 });
     
     if (recentQuiz) {

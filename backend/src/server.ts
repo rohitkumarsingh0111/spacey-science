@@ -5,6 +5,10 @@ import mongoose from 'mongoose';
 import userRoutes from './routes/user.routes';
 import quizRoutes from './routes/quiz.routes';
 import progressRoutes from './routes/progress.routes';
+import lessonRoutes from "./routes/lesson.routes";
+
+
+
 
 dotenv.config();
 
@@ -66,6 +70,8 @@ app.get('/api/health', (_req, res) => {
 app.use('/api/users', userRoutes);
 app.use('/api/quiz', quizRoutes);
 app.use('/api/progress', progressRoutes);
+app.use("/api/lesson", lessonRoutes);
+
 
 /* ========================
    404 HANDLER
@@ -96,6 +102,7 @@ app.use(
     });
   }
 );
+
 
 /* ========================
    DATABASE + SERVER START
