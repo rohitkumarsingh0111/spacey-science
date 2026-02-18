@@ -5,7 +5,6 @@ import {
   ArrowLeft,
   Trophy,
   Star,
-  TrendingUp,
   Target,
   Award,
   Rocket,
@@ -16,7 +15,6 @@ import { Badge } from "@/components/badge";
 import { Progress } from "@/components/progress";
 
 import { getUserProgress, getProgressStats } from "@/lib/api";
-import SpaceBackground from "@/components/background/SpaceBackground";
 import { Progress as ProgressItem, ProgressStats, User } from "@/types/types";
 
 interface DashboardPageProps {
