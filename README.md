@@ -15,6 +15,8 @@ API Health: https://spacey-science.onrender.com/api/health
 🎯 Specialization Focus
 🛰 Primary Path: Interactive Journey (Frontend & Product UX)
 🧠 Secondary: Intelligent AI Tutor
+
+
 Why This Direction?
 
 The goal was to design a cohesive learning experience where:
