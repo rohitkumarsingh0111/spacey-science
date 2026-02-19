@@ -1,7 +1,12 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+
+const API_URL =
+  import.meta.env.MODE === "production"
+    ? "https://spacey-science.onrender.com"
+    : "http://localhost:3000";
 
 export default function LessonPage() {
   const { topicId } = useParams();
@@ -23,7 +28,7 @@ export default function LessonPage() {
       setLoading(true);
       setError(null);
 
-      const res = await fetch("http://localhost:3000/api/lesson/generate", {
+      const res = await fetch(`${API_URL}/api/lesson/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ topic: topicId }),
@@ -40,7 +45,7 @@ export default function LessonPage() {
       setExpandedContent(null);
     } catch (err: any) {
       console.error("Lesson Fetch Error:", err);
-      setError(err.message || "Something went wrong");
+      setError(err.message || "Failed to fetch lesson");
     } finally {
       setLoading(false);
     }
@@ -52,7 +57,7 @@ export default function LessonPage() {
     try {
       const section = lesson.sections[currentSection];
 
-      const res = await fetch("http://localhost:3000/api/lesson/expand", {
+      const res = await fetch(`${API_URL}/api/lesson/expand`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ section }),
@@ -117,7 +122,6 @@ export default function LessonPage() {
   return (
     <div className="space-bg min-h-screen relative">
       <div className="content-wrapper container mx-auto px-4 py-12">
-
         <h1 className="text-4xl text-white mb-6 text-center">
           {lesson.title}
         </h1>
