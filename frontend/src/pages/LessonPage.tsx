@@ -2,12 +2,10 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { getTopic } from '@/lib/topics';
 
 export default function LessonPage() {
   const { topicId } = useParams();
   const navigate = useNavigate();
-  const topic = getTopic(topicId || '');
 
   const [lesson, setLesson] = useState<any>(null);
   const [loading, setLoading] = useState(true);
