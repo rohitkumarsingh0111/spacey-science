@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import Loader from "@/components/Loader";
 
 const API_URL =
   import.meta.env.MODE === "production"
@@ -92,7 +93,8 @@ export default function LessonPage() {
   if (loading) {
     return (
       <div className="space-bg min-h-screen flex items-center justify-center">
-        <p className="text-white text-xl">AI is preparing your lesson...</p>
+        <Loader/>
+        
       </div>
     );
   }
